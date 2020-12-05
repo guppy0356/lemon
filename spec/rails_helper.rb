@@ -61,4 +61,23 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
+
+  config.before :each, type: :system do
+    url = "http://#{ENV['HOST']}:4444/wd/hub"
+
+    driven_by :selenium, using: :headless_chrome, screen_size: [1024, 768], options: {
+      browser: :remote,
+      url: url,
+      desired_capabilities: :chrome
+    }
+
+    Capybara.server_host = '0.0.0.0'
+    Capybara.server_port = '43447'
+    Capybara.app_host = "http://#{ENV['HOST']}"
+
+    page.driver.browser.file_detector = lambda do |args|
+      str = args.first.to_s
+      str if File.exist?(str)
+    end
+  end
 end
